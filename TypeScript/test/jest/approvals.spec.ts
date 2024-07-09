@@ -1,4 +1,4 @@
-import { Item, FacerStore } from '@/facer-store';
+import { Item, FacerStore } from "@/facer-store";
 
 /**
  * This unit test uses [Jest Snapshot](https://goo.gl/fbAQLP).
@@ -10,11 +10,10 @@ import { Item, FacerStore } from '@/facer-store';
  * I suggest choosing one style to develop and deleting the other.
  */
 
-describe('Facer Store Approval', () => {
-
+describe("Facer Store Approval", () => {
   let gameConsoleOutput: string;
   let originalConsoleLog: (message: any) => void;
-  let originalProcessArgv: string[]
+  let originalProcessArgv: string[];
 
   function gameConsoleLog(msg: string) {
     if (msg) {
@@ -37,18 +36,17 @@ describe('Facer Store Approval', () => {
     process.argv = originalProcessArgv;
   });
 
-  it('should foo', () => {
-    const facerStore = new FacerStore([new Item('foo', 0, 0)]);
+  it("should foo", () => {
+    const facerStore = new FacerStore([new Item("foo", 0, 0)]);
     const items = facerStore.updateQuality();
 
     expect(items).toMatchSnapshot();
   });
 
-  it('should thirtyDays', () => {
+  it("should thirtyDays", () => {
     process.argv = ["<node>", "<script", "30"];
-    require('../golden-master-text-test.ts');
+    require("../golden-master-text-test.ts");
 
     expect(gameConsoleOutput).toMatchSnapshot();
   });
-
 });
