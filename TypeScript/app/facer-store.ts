@@ -1,9 +1,17 @@
+export enum ItemType {
+  VintageRolex = "Vintage Rolex",
+  PassesToWatchfaceConference = "Passes to Watchface Conference",
+  LegendaryWatchFace = "Legendary Watch Face",
+  FragileWatch = "Fragile Watch",
+  DefaultWatch = "Default Watch",
+}
+
 export class Item {
   name: string;
   sellIn: number;
   quality: number;
 
-  constructor(name, sellIn, quality) {
+  constructor(name: string, sellIn: number, quality: number) {
     this.name = name;
     this.sellIn = sellIn;
     this.quality = quality;
@@ -17,53 +25,79 @@ export class FacerStore {
     this.items = items;
   }
 
-  updateQuality() {
-    for (let i = 0; i < this.items.length; i++) {
-      if (this.items[i].name != 'Vintage Rolex' && this.items[i].name != 'Passes to Watchface Conference') {
-        if (this.items[i].quality > 0) {
-          if (this.items[i].name != 'Legendary Watch Face') {
-            this.items[i].quality = this.items[i].quality - 1
-          }
-        }
-      } else {
-        if (this.items[i].quality < 50) {
-          this.items[i].quality = this.items[i].quality + 1
-          if (this.items[i].name == 'Passes to Watchface Conference') {
-            if (this.items[i].sellIn < 11) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1
-              }
-            }
-            if (this.items[i].sellIn < 6) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1
-              }
-            }
-          }
-        }
-      }
-      if (this.items[i].name != 'Legendary Watch Face') {
-        this.items[i].sellIn = this.items[i].sellIn - 1;
-      }
-      if (this.items[i].sellIn < 0) {
-        if (this.items[i].name != 'Vintage Rolex') {
-          if (this.items[i].name != 'Passes to Watchface Conference') {
-            if (this.items[i].quality > 0) {
-              if (this.items[i].name != 'Legendary Watch Face') {
-                this.items[i].quality = this.items[i].quality - 1
-              }
-            }
-          } else {
-            this.items[i].quality = this.items[i].quality - this.items[i].quality
-          }
-        } else {
-          if (this.items[i].quality < 50) {
-            this.items[i].quality = this.items[i].quality + 1
-          }
-        }
-      }
+  private incrementQuality(item: Item, amount: number = 1) {
+    item.quality = Math.min(item.quality + amount, 50);
+  }
+
+  private decrementQuality(item: Item, amount: number = 1) {
+    item.quality = Math.max(item.quality - amount, 0);
+  }
+
+  private decreaseSellIn(item: Item) {
+    item.sellIn = item.sellIn - 1;
+  }
+
+  private handleVintageRolexChange(item: Item) {
+    this.incrementQuality(item);
+
+    this.decreaseSellIn(item);
+
+    if (item.sellIn < 0) {
+      this.incrementQuality(item);
     }
 
-    return this.items;
+    return item;
+  }
+
+  private handlePassesConferenceChange(item: Item) {
+    this.incrementQuality(item);
+    if (item.sellIn < 11) this.incrementQuality(item);
+    if (item.sellIn < 6) this.incrementQuality(item);
+
+    this.decreaseSellIn(item);
+
+    if (item.sellIn < 0) {
+      item.quality = 0;
+    }
+    return item;
+  }
+
+  private handleFragileWatchChange(item: Item) {
+    this.decrementQuality(item, 2);
+
+    this.decreaseSellIn(item);
+
+    if (item.sellIn < 0) {
+      this.decrementQuality(item, 2);
+    }
+    return item;
+  }
+
+  private handleDefaultWatchChange(item: Item) {
+    this.decrementQuality(item);
+
+    this.decreaseSellIn(item);
+
+    if (item.sellIn < 0) {
+      this.decrementQuality(item);
+    }
+    return item;
+  }
+
+  updateQuality() {
+    return this.items.map((item) => {
+      switch (item.name) {
+        case ItemType.LegendaryWatchFace:
+          return item;
+        case ItemType.VintageRolex:
+          return this.handleVintageRolexChange(item);
+        case ItemType.PassesToWatchfaceConference:
+          return this.handlePassesConferenceChange(item);
+        case ItemType.FragileWatch:
+          return this.handleFragileWatchChange(item);
+        default:
+          return this.handleDefaultWatchChange(item);
+      }
+    });
   }
 }
